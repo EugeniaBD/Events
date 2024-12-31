@@ -1,6 +1,7 @@
 "use client";
+import Header from "@/features/header";
 import React from "react";
-import "./globals.css";
+import "../globals.css";
 
 const Layout: React.FC<
   Readonly<{
@@ -8,9 +9,10 @@ const Layout: React.FC<
   }>
 > = ({ children }) => {
   return (
-    <html lang="en">
-      <body className="p-0 h-dvh max-h-dvh overflow-hidden">{children}</body>
-    </html>
+    <>
+      <Header />
+      <main className="p-4 bg-slate-50 h-full">{children}</main>
+    </>
   );
 };
 
