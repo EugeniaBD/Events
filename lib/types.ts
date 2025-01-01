@@ -26,12 +26,13 @@ export type TUserInfo = {
 
 export type TEvent = {
   id: string;
+  userId: string;
   title: string;
   description: string;
-  datetime: string;
-  venue: string;
-  link: string;
-  parentId: string;
+  location: string;
+  places: number;
+  datetime: Date;
+  parentId?: string;
 };
 
 export type TRequest = {

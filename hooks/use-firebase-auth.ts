@@ -1,7 +1,7 @@
+import React from "react";
 import auth from "@/firebase/auth";
 import { getUserRole } from "@/firebase/firestore/usersCollection";
 import { TUser } from "@/lib/types";
-import React from "react";
 
 const useFirebaseAuth = () => {
   const [user, setUser] = React.useState<TUser | null>(null);

@@ -33,15 +33,24 @@ const Page: React.FC = () => {
         </Button>
       </div>
       <div className="flex flex-col space-y-2 py-2">
-        {clubs.map(({ id, title, description, requests }) => (
+        {clubs.map(({ id, title, description, requests, members }) => (
           <Card key={id}>
             <CardHeader>
               <Link href={`/admin/clubs/${id}`}>
-                <CardTitle className="text-2xl inline-flex items-center space-x-1">
-                  <span>{title}</span>
-                  {requests && requests.length > 0 && (
-                    <Badge className="rounded-full">{requests.length}</Badge>
-                  )}
+                <CardTitle className="text-2xl flex items-start space-x-1 ">
+                  <span className="flex-grow">{title}</span>
+                  <span className="flex space-x-1">
+                    {requests && requests.length > 0 && (
+                      <Badge className="rounded-full">
+                        Requests {requests.length}
+                      </Badge>
+                    )}
+                    {members && members.length > 0 && (
+                      <Badge className="rounded-full">
+                        Members {members.length}
+                      </Badge>
+                    )}
+                  </span>
                 </CardTitle>
                 <CardDescription>{description}</CardDescription>
               </Link>

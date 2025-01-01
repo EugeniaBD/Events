@@ -10,7 +10,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { create } from "@/firebase/firestore/clubsCollection";
+import { create } from "@/firebase/firestore/eventsCollection";
 import useFirebaseAuth from "@/hooks/use-firebase-auth";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
@@ -21,11 +21,17 @@ import * as Yup from "yup";
 const defaultValues = {
   title: "",
   description: "",
+  places: 0,
+  datetime: new Date().toUTCString(),
+  location: "",
 };
 
 const Schema = Yup.object().shape({
   title: Yup.string().required(),
   description: Yup.string().required(),
+  places: Yup.number().required().min(1),
+  datetime: Yup.string().required(),
+  location: Yup.string().required(),
 });
 
 type TSchema = Yup.InferType<typeof Schema>;
@@ -45,7 +51,11 @@ const Page: React.FC = () => {
     (value: TSchema) => {
       if (user) {
         setSubmiting(true);
-        create({ ...value, userId: user?.uid })
+        create({
+          ...value,
+          userId: user?.uid,
+          datetime: new Date(value.datetime),
+        })
           .then(() => router.back())
           .finally(() => setSubmiting(false));
       }
@@ -57,7 +67,7 @@ const Page: React.FC = () => {
 
   return (
     <div className="flex min-h-svh w-full">
-      <div className="w-full max-w-full md:max-w-md ">
+      <div className="w-full max-w-full sm:max-w-sm md:max-w-md lg:max-w-lg ">
         <Card>
           <CardContent className="p-4">
             <Form {...form}>
@@ -84,6 +94,40 @@ const Page: React.FC = () => {
                         <FormLabel>Description</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="description" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="places"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Places</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="number of places"
+                            type="number"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="datetime"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Date Time</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="date time"
+                            type="datetime-local"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

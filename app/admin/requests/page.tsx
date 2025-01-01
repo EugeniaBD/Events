@@ -9,19 +9,26 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import RequestList from "@/features/request-list";
-import { getAllByUserId as getAllClubsByUserId } from "@/firebase/firestore/clubsCollection";
-import { getAllByUserId as getAllGroupsByUserId } from "@/firebase/firestore/groupsCollection";
+import {
+  getAllByUserId as getAllClubsByUserId,
+  update as updateClub,
+} from "@/firebase/firestore/clubsCollection";
+import {
+  getAllByUserId as getAllGroupsByUserId,
+  update as updateGroup,
+} from "@/firebase/firestore/groupsCollection";
 import useFirebaseAuth from "@/hooks/use-firebase-auth";
-import { TAdminRequestGroupItem } from "@/lib/types";
+import { TAdminRequestGroupItem, TEntity } from "@/lib/types";
 import React from "react";
 
 const Page: React.FC = () => {
   const { user } = useFirebaseAuth();
-  const [requestGroups, setrequestGroups] = React.useState<
+
+  const [requestGroups, setRequestGroups] = React.useState<
     TAdminRequestGroupItem[]
   >([]);
 
-  React.useEffect(() => {
+  const fetchRequests = React.useCallback(() => {
     if (!user) {
       return;
     }
@@ -31,22 +38,75 @@ const Page: React.FC = () => {
         (entities) =>
           ({
             type: "Clubs",
-            entities: entities.filter((e) => e.requests),
+            entities: entities.filter(
+              (e) => e.requests && e.requests.length > 0
+            ),
           } as TAdminRequestGroupItem)
       ),
       getAllGroupsByUserId(user.uid).then(
         (entities) =>
           ({
             type: "Groups",
-            entities: entities.filter((e) => e.requests),
+            entities: entities.filter(
+              (e) => e.requests && e.requests.length > 0
+            ),
           } as TAdminRequestGroupItem)
       ),
     ]).then((results) => {
-      const data = results;
+      const data = results.filter((e) => e.entities && e.entities.length > 0);
       console.log("data", data);
-      setrequestGroups(data);
+      setRequestGroups(data);
     });
   }, [user]);
+
+  React.useEffect(() => {
+    fetchRequests();
+  }, [user]);
+
+  const handleRequestReject = (
+    { type, ...rest }: TEntity,
+    requestId: string
+  ) => {
+    const requests = rest.requests?.filter((r) => r.id !== requestId);
+    const _rest = { ...rest, requests };
+    let promise = undefined;
+    if (type.toLocaleLowerCase() === "club") {
+      promise = updateClub({ ..._rest });
+    } else if (type.toLocaleLowerCase() === "group") {
+      promise = updateGroup({ ..._rest });
+    }
+
+    if (!promise) {
+      return;
+    }
+
+    promise.then(() => fetchRequests());
+  };
+
+  const handleRequestAccept = (
+    { type, ...rest }: TEntity,
+    requestId: string
+  ) => {
+    const requestByUser = rest.requests?.find((r) => r.id === requestId);
+    const members = rest.members ? [...rest.members] : [];
+    if (requestByUser) {
+      members.push(requestByUser.user);
+    }
+    const requests = rest.requests?.filter((r) => r.id !== requestId);
+    const _rest = { ...rest, requests, members };
+    let promise = undefined;
+    if (type.toLocaleLowerCase() === "club") {
+      promise = updateClub({ ..._rest });
+    } else if (type.toLocaleLowerCase() === "group") {
+      promise = updateGroup({ ..._rest });
+    }
+
+    if (!promise) {
+      return;
+    }
+
+    promise.then(() => fetchRequests());
+  };
 
   return (
     <>
@@ -80,7 +140,15 @@ const Page: React.FC = () => {
                         Requests: {entity.requests?.length}
                       </Badge>
                     </h6>
-                    <RequestList requests={entity.requests} />
+                    <RequestList
+                      requests={entity.requests}
+                      onAccept={(requestId: string) =>
+                        handleRequestAccept(entity, requestId)
+                      }
+                      onReject={(requestId: string) =>
+                        handleRequestReject(entity, requestId)
+                      }
+                    />
                   </div>
                 ))}
               </div>

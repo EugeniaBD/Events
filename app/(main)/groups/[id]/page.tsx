@@ -23,9 +23,11 @@ const Page: React.FC = () => {
   const [group, setGroup] = React.useState<TGroup | null>(null);
 
   const fetchById = React.useCallback(() => {
-    getById(id).then((club) => {
-      setGroup(club);
-    });
+    if (id) {
+      getById(id).then((club) => {
+        setGroup(club);
+      });
+    }
   }, [id]);
 
   React.useEffect(() => {
@@ -38,6 +40,7 @@ const Page: React.FC = () => {
 
   React.useEffect(() => {
     fetchById();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const handleBack = () => router.back();
@@ -56,12 +59,14 @@ const Page: React.FC = () => {
 
     const { uid, displayName, email } = user;
     const request: TRequest = {
+      id: uid,
       user: { id: uid, displayName, email },
     };
     const requests: TRequest[] = group.requests
       ? [...group.requests, { ...request }]
       : [{ ...request }];
     update({ ...group, requests }).then(() => fetchById());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [group, user]);
 
   const handleLeave = () => {};

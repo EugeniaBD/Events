@@ -1,4 +1,5 @@
 "use client";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -39,6 +40,7 @@ const Page: React.FC = () => {
   const router = useRouter();
   const params = useSearchParams();
 
+  const [error, setError] = React.useState<unknown>();
   const [submiting, setSubmiting] = React.useState(false);
 
   const form = useForm<TSchema>({
@@ -50,10 +52,17 @@ const Page: React.FC = () => {
     setSubmiting(true);
     signIn(email, password)
       .then(({ result, error }) => {
-        // console.log(result, error);
-        if (error || !result) {
+        console.log(result, error);
+        if (error) {
+          setError(error);
           return;
         }
+
+        if (!result) {
+          return;
+        }
+
+        setError(null);
 
         const redirectUrl = params.get("redirect-url");
         if (redirectUrl) {
@@ -83,6 +92,12 @@ const Page: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {Boolean(error) && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{`${error}`}</AlertDescription>
+              </Alert>
+            )}
             <Form {...form}>
               <form onSubmit={form.handleSubmit(submitHandler)}>
                 <div className="grid gap-y-4">

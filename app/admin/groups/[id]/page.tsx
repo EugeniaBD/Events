@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import EntityChildrenCardContent from "@/features/entity-children-card-content";
-import { getById } from "@/firebase/firestore/groupsCollection";
+import { getById, update } from "@/firebase/firestore/groupsCollection";
 import { TGroup } from "@/lib/types";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
@@ -18,13 +18,48 @@ const Page: React.FC = () => {
   const router = useRouter();
   const [group, setGroup] = React.useState<TGroup | null>(null);
 
-  React.useEffect(() => {
+  const fetchById = React.useCallback(() => {
     getById(id).then((data) => {
       setGroup(data);
     });
   }, [id]);
 
+  React.useEffect(() => {
+    if (id) fetchById();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
   const handleBack = () => router.back();
+
+  const handleRequestReject = React.useCallback(
+    (requestId: string) => {
+      if (group) {
+        const requests = group.requests?.filter((r) => r.id !== requestId);
+        const _group = { ...group, requests };
+        update({ ..._group }).then(() => fetchById());
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [group]
+  );
+
+  const handleRequestAccept = React.useCallback(
+    (requestId: string) => {
+      if (group) {
+        console.log("group", group);
+        const requestByUser = group.requests?.find((r) => r.id === requestId);
+        const members = group.members ? [...group.members] : [];
+        if (requestByUser) {
+          members.push(requestByUser.user);
+        }
+        const requests = group.requests?.filter((r) => r.id !== requestId);
+        const _group = { ...group, requests, members };
+        update({ ..._group }).then(() => fetchById());
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [group]
+  );
 
   return (
     <>
@@ -41,6 +76,8 @@ const Page: React.FC = () => {
             <EntityChildrenCardContent
               events={group.events || []}
               requests={group.requests || []}
+              onAccept={handleRequestAccept}
+              onReject={handleRequestReject}
               members={group.members || []}
             />
           </Card>

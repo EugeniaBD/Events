@@ -41,12 +41,16 @@ const EntityUserActions: React.FC<EntityUserActionsProps> = ({
   return (
     <div className="m-0">
       {joined && (
-        <Button variant="destructive" onClick={leave}>
-          Leave
+        <Badge variant="outline" onClick={leave}>
+          Joined
+        </Badge>
+      )}
+      {requestSent && <Badge variant="secondary">Request Sent</Badge>}
+      {!requestSent && !joined && (
+        <Button size="sm" onClick={join}>
+          Join
         </Button>
       )}
-      {requestSent && <Badge variant="default">Request Sent</Badge>}
-      {!requestSent && !joined && <Button onClick={join}>Join</Button>}
     </div>
   );
 };

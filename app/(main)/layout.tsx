@@ -11,7 +11,9 @@ const Layout: React.FC<
   return (
     <>
       <Header />
-      <main className="p-4 bg-slate-50 h-full">{children}</main>
+      <main className="p-4 bg-slate-50 h-full max-h-full overflow-auto pb-20">
+        {children}
+      </main>
     </>
   );
 };

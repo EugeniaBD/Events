@@ -37,3 +37,13 @@ export const getAllByUserId = async (userId: string) => {
   }
   return records;
 };
+
+export const getAllByMemberId = async (userId: string) => {
+  const records = await getCollection<TClub>(PATH);
+  const { error } = records;
+  let { result } = records;
+  if (result) {
+    result = result.filter((r) => !!r.members?.find((m) => m.id === userId));
+  }
+  return { error, result };
+};

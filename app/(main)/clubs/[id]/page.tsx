@@ -23,9 +23,11 @@ const Page: React.FC = () => {
   const [club, setClub] = React.useState<TClub | null>(null);
 
   const fetchById = React.useCallback(() => {
-    getById(id).then((club) => {
-      setClub(club);
-    });
+    if (id) {
+      getById(id).then((club) => {
+        setClub(club);
+      });
+    }
   }, [id]);
 
   React.useEffect(() => {
@@ -38,6 +40,7 @@ const Page: React.FC = () => {
 
   React.useEffect(() => {
     fetchById();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const handleBack = () => router.back();

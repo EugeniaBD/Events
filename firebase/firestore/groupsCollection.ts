@@ -11,7 +11,6 @@ export const create = (group: Omit<TGroup, "id">) => {
 };
 
 export const update = (group: TGroup) => {
-  console.log("update", group);
   return updateDocument(PATH, group.id, group);
 };
 
@@ -37,4 +36,14 @@ export const getAllByUserId = async (userId: string) => {
     return [];
   }
   return records;
+};
+
+export const getAllByMemberId = async (userId: string) => {
+  const records = await getCollection<TGroup>(PATH);
+  const { error } = records;
+  let { result } = records;
+  if (result) {
+    result = result.filter((r) => !!r.members?.find((m) => m.id === userId));
+  }
+  return { error, result };
 };
