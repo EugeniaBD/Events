@@ -11,7 +11,6 @@ export const create = (club: Omit<TClub, "id">) => {
 };
 
 export const update = (club: TClub) => {
-  console.log("update", club);
   return updateDocument(PATH, club.id, club);
 };
 

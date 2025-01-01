@@ -35,7 +35,7 @@ export type TEvent = {
 };
 
 export type TRequest = {
-  id?: string;
+  id: string;
   user: TUserInfo;
 };
 

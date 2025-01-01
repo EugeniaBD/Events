@@ -50,7 +50,7 @@ const Page: React.FC = () => {
     setSubmiting(true);
     signIn(email, password)
       .then(({ result, error }) => {
-        console.log(result, error);
+        // console.log(result, error);
         if (error || !result) {
           return;
         }

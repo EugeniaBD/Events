@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -32,12 +33,17 @@ const Page: React.FC = () => {
         </Button>
       </div>
       <div className="flex flex-col space-y-2 py-2">
-        {groups.map((club) => (
-          <Card key={club.id}>
+        {groups.map(({ id, title, description, requests }) => (
+          <Card key={id}>
             <CardHeader>
-              <Link href={`/admin/groups/${club.id}`}>
-                <CardTitle className="text-2xl">{club.title}</CardTitle>
-                <CardDescription>{club.description}</CardDescription>
+              <Link href={`/admin/groups/${id}`}>
+                <CardTitle className="text-2xl inline-flex items-center space-x-1">
+                  <span>{title}</span>
+                  {requests && requests.length > 0 && (
+                    <Badge className="rounded-full">{requests.length}</Badge>
+                  )}
+                </CardTitle>
+                <CardDescription>{description}</CardDescription>
               </Link>
             </CardHeader>
           </Card>

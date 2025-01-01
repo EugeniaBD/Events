@@ -56,6 +56,7 @@ const Page: React.FC = () => {
 
     const { uid, displayName, email } = user;
     const request: TRequest = {
+      id: uid,
       user: { id: uid, displayName, email },
     };
     const requests: TRequest[] = club.requests
