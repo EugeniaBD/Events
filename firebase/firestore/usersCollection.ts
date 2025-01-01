@@ -9,11 +9,9 @@ export const setUserRole = (userRole: Omit<TUserRole, "id">) => {
 };
 
 export const getUserRole = async (userId: string) => {
-  const queryResult = await queryWhere(USERS, "userId", "==", userId);
-  if (queryResult.empty) {
+  const records = await queryWhere<TUserRole>(USERS, "userId", "==", userId);
+  if (!records || records.length === 0) {
     return;
   }
-  return queryResult.docs.map(
-    (d) => ({ id: d.id, ...d.data() } as TUserRole)
-  )[0];
+  return records[0];
 };

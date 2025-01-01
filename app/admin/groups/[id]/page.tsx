@@ -39,9 +39,9 @@ const Page: React.FC = () => {
               <CardDescription>{group.description}</CardDescription>
             </CardHeader>
             <EntityChildrenCardContent
-              events={group.events}
-              requests={group.requests}
-              members={group.members}
+              events={group.events || []}
+              requests={group.requests || []}
+              members={group.members || []}
             />
           </Card>
         )}

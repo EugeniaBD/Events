@@ -20,14 +20,14 @@ const Page: React.FC = () => {
 
   return (
     <div className="h-dvh max-h-dvh overflow-auto p-4 space-y-2">
-      <div className="p-4 bg-white border space-y-4">
+      <div className="p-4 bg-white border rounded-xl space-y-4">
         <Input
           value={searchQuery}
           onChange={handleSearchQueryInput}
           placeholder="search groups, clubs and events"
         />
         <div>
-          <ul className="divide-y ">
+          <ul className="divide-y">
             {entities.map(({ id, title, description, type }) => (
               <li key={id} className="list-none p-2">
                 <Link href={`/${type.toLowerCase()}s/${id}`}>

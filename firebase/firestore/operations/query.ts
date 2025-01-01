@@ -12,26 +12,30 @@ import { firestore } from "../../config";
 
 export const findById = async <T>(path: string, id: string) => {
   console.log("path, id", path, id);
-  const querySnap = await queryWhere(path, documentId(), "==", id);
-  if (querySnap.empty) {
+  const records = await queryWhere<T>(path, documentId(), "==", id);
+
+  if (!records) {
     return null;
   }
-  return querySnap.docs.map(
-    (d) =>
-      ({
-        id: d.id,
-        ...d.data(),
-      } as T)
-  )[0];
+
+  if (records?.length === 0) {
+    return null;
+  }
+
+  return records[0];
 };
 
-export const queryWhere = async (
+export const queryWhere = async <T>(
   path: string,
   fieldPath: string | FieldPath,
   opStr: WhereFilterOp,
   value: unknown
 ) => {
-  return queryFrom(path, where(fieldPath, opStr, value));
+  const queryResult = await queryFrom(path, where(fieldPath, opStr, value));
+  if (queryResult.empty) {
+    return [];
+  }
+  return queryResult.docs.map((d) => ({ id: d.id, ...d.data() } as T));
 };
 
 export const queryFrom = async (

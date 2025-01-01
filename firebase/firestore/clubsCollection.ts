@@ -1,7 +1,7 @@
 import { TClub } from "@/lib/types";
 import createDocument from "./operations/createDocumentSnapshot";
 import getCollection from "./operations/getCollectionSnapshot";
-import { findById } from "./operations/query";
+import { findById, queryWhere } from "./operations/query";
 import updateDocument from "./operations/updateDocumentSnapshot";
 
 export const PATH = "clubs";
@@ -29,4 +29,12 @@ export const getAll = async () => {
     return [];
   }
   return result;
+};
+
+export const getAllByUserId = async (userId: string) => {
+  const records = await queryWhere<TClub>(PATH, "userId", "==", userId);
+  if (!records) {
+    return [];
+  }
+  return records;
 };

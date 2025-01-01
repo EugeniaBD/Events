@@ -2,11 +2,17 @@ import { TGroup } from "@/lib/types";
 import createDocument from "./operations/createDocumentSnapshot";
 import getCollection from "./operations/getCollectionSnapshot";
 import * as query from "./operations/query";
+import updateDocument from "./operations/updateDocumentSnapshot";
 
 export const PATH = "groups";
 
-export const create = (club: Omit<TGroup, "id">) => {
-  return createDocument(PATH, club);
+export const create = (group: Omit<TGroup, "id">) => {
+  return createDocument(PATH, group);
+};
+
+export const update = (group: TGroup) => {
+  console.log("update", group);
+  return updateDocument(PATH, group.id, group);
 };
 
 export const getById = async (id: string) => {
@@ -23,4 +29,12 @@ export const getAll = async () => {
     return [];
   }
   return result;
+};
+
+export const getAllByUserId = async (userId: string) => {
+  const records = await query.queryWhere<TGroup>(PATH, "userId", "==", userId);
+  if (!records || records.length === 0) {
+    return [];
+  }
+  return records;
 };

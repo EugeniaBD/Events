@@ -9,9 +9,9 @@ import {
 } from "@/components/ui/card";
 import EntityChildrenCardContent from "@/features/entity-children-card-content";
 import EntityUserActions from "@/features/entity-user-actions";
-import { getById, update } from "@/firebase/firestore/clubsCollection";
+import { getById, update } from "@/firebase/firestore/groupsCollection";
 import useFirebaseAuth from "@/hooks/use-firebase-auth";
-import { TClub, TRequest } from "@/lib/types";
+import { TGroup, TRequest } from "@/lib/types";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback } from "react";
 
@@ -20,18 +20,18 @@ const Page: React.FC = () => {
   const params = useSearchParams();
   const { user } = useFirebaseAuth();
   const router = useRouter();
-  const [club, setClub] = React.useState<TClub | null>(null);
+  const [group, setGroup] = React.useState<TGroup | null>(null);
 
   const fetchById = React.useCallback(() => {
     getById(id).then((club) => {
-      setClub(club);
+      setGroup(club);
     });
   }, [id]);
 
   React.useEffect(() => {
     if (params.get("action") === "join" && user) {
       handleJoin();
-      router.replace(`/clubs/${id}`, {});
+      router.replace(`/groups/${id}`, {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params, user]);
@@ -43,7 +43,7 @@ const Page: React.FC = () => {
   const handleBack = () => router.back();
 
   const handleJoin = useCallback(() => {
-    if (!club) {
+    if (!group) {
       return;
     }
 
@@ -58,11 +58,11 @@ const Page: React.FC = () => {
     const request: TRequest = {
       user: { id: uid, displayName, email },
     };
-    const requests: TRequest[] = club.requests
-      ? [...club.requests, { ...request }]
+    const requests: TRequest[] = group.requests
+      ? [...group.requests, { ...request }]
       : [{ ...request }];
-    update({ ...club, requests }).then(() => fetchById());
-  }, [club, user]);
+    update({ ...group, requests }).then(() => fetchById());
+  }, [group, user]);
 
   const handleLeave = () => {};
 
@@ -72,24 +72,24 @@ const Page: React.FC = () => {
         <Button onClick={handleBack}>Back</Button>
       </div>
       <div className="py-4">
-        {club && (
+        {group && (
           <Card>
             <CardHeader className="flex flex-row items-start space-x-1 space-y-0">
               <div className="flex-grow">
-                <CardTitle>{club.title}</CardTitle>
-                <CardDescription>{club.description}</CardDescription>
+                <CardTitle>{group.title}</CardTitle>
+                <CardDescription>{group.description}</CardDescription>
               </div>
-              {user && club && (
+              {user && group && (
                 <EntityUserActions
                   user={user}
-                  requests={club.requests ?? []}
-                  members={club.members ?? []}
+                  requests={group.requests ?? []}
+                  members={group.members ?? []}
                   join={handleJoin}
                   leave={handleLeave}
                 />
               )}
             </CardHeader>
-            <EntityChildrenCardContent events={club.events || []} />
+            <EntityChildrenCardContent events={group.events || []} />
           </Card>
         )}
       </div>

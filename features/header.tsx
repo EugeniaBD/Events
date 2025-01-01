@@ -43,7 +43,7 @@ const Header: React.FC = () => {
 
   return (
     <header className="p-4 flex justify-between items-center border">
-      <h6 className="font-bold text-lg">Solent Social</h6>
+      <h6 className="font-bold text-lg">Social Events</h6>
 
       <NavigationMenu>
         <NavigationMenuList>

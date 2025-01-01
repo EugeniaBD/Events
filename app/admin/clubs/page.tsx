@@ -7,17 +7,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getAll } from "@/firebase/firestore/clubsCollection";
+import { getAllByUserId } from "@/firebase/firestore/clubsCollection";
+import useFirebaseAuth from "@/hooks/use-firebase-auth";
 import { TClub } from "@/lib/types";
 import Link from "next/link";
 import React from "react";
 
 const Page: React.FC = () => {
   const [clubs, setClubs] = React.useState<TClub[]>([]);
+  const { user } = useFirebaseAuth();
 
   React.useEffect(() => {
-    getAll().then((data) => setClubs(data));
-  }, []);
+    if (user) {
+      getAllByUserId(user.uid).then((data) => setClubs(data));
+    }
+  }, [user]);
 
   return (
     <>

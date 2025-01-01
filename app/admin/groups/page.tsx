@@ -7,17 +7,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getAll } from "@/firebase/firestore/groupsCollection";
+import { getAllByUserId } from "@/firebase/firestore/groupsCollection";
+import useFirebaseAuth from "@/hooks/use-firebase-auth";
 import { TGroup } from "@/lib/types";
 import Link from "next/link";
 import React from "react";
 
 const Page: React.FC = () => {
+  const { user } = useFirebaseAuth();
   const [groups, setGroups] = React.useState<TGroup[]>([]);
 
   React.useEffect(() => {
-    getAll().then((data) => setGroups(data));
-  }, []);
+    if (user) {
+      getAllByUserId(user.uid).then((data) => setGroups(data));
+    }
+  }, [user]);
 
   return (
     <>

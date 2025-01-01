@@ -39,6 +39,17 @@ export type TRequest = {
   user: TUserInfo;
 };
 
+export type TEntityRequest = {
+  id?: string;
+  title: string;
+  user: TUserInfo;
+};
+
+export type TAdminRequestGroupItem = {
+  type: string;
+  entities: TEntity[];
+};
+
 export type TEntity = {
   id: string;
   title: string;
