@@ -39,23 +39,28 @@ const EntityUserActions: React.FC<EntityUserActionsProps> = ({
   }, [user, members]);
 
   if (type.toLocaleLowerCase() === "event") {
-    const { bookings, isCancled } = entity as unknown as TEvent;
+    const { bookings, isCancled, places } = entity as unknown as TEvent;
     const booked = !!bookings?.find((r) => r.id === user?.uid);
-
+    const isAllBooked = places > (bookings?.length || 0);
     return (
       <div className="m-0">
-        {isCancled && <Badge>Canceled</Badge>}
-        {isCancled && (
+        {isCancled && <Badge variant="destructive">Canceled</Badge>}
+        {!isCancled && (
           <>
-            {booked && (
-              <Badge variant="outline" onClick={leave}>
-                Booked
-              </Badge>
-            )}
-            {!booked && (
-              <Button size="sm" onClick={join}>
-                Book
-              </Button>
+            {isAllBooked && <Badge>All booked</Badge>}
+            {!isAllBooked && (
+              <>
+                {booked && (
+                  <Badge variant="destructive" onClick={leave}>
+                    Booking full
+                  </Badge>
+                )}
+                {!booked && (
+                  <Button size="sm" onClick={join}>
+                    Book
+                  </Button>
+                )}
+              </>
             )}
           </>
         )}
