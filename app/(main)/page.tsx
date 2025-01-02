@@ -3,10 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import EntityUserActions from "@/features/entity-user-actions";
 import { update as updateClub } from "@/firebase/firestore/clubsCollection";
+import { update as updateEvent } from "@/firebase/firestore/eventsCollection";
 import { update as updateGroup } from "@/firebase/firestore/groupsCollection";
 import { searchInAll } from "@/firebase/firestore/operations/searchInAll";
 import useFirebaseAuth from "@/hooks/use-firebase-auth";
-import { TEntity, TRequest } from "@/lib/types";
+import { TEntity, TEvent, TRequest } from "@/lib/types";
 import Link from "next/link";
 import React, { ChangeEventHandler } from "react";
 
@@ -50,6 +51,15 @@ const Page: React.FC = () => {
         promise = updateClub({ ...entity, requests });
       } else if (entity.type.toLowerCase() === "group") {
         promise = updateGroup({ ...entity, requests });
+      } else if (entity.type.toLowerCase() === "event") {
+        const { ...rest } = entity as unknown as TEvent;
+        let { bookings } = rest;
+        bookings = bookings ?? [];
+        bookings = [...bookings, { id: uid, displayName, email }];
+        promise = updateEvent({
+          ...rest,
+          bookings,
+        });
       }
       if (!promise) {
         return;
@@ -92,8 +102,7 @@ const Page: React.FC = () => {
                 </Link>
                 {user && (
                   <EntityUserActions
-                    requests={entity.requests || []}
-                    members={entity.members || []}
+                    entity={entity}
                     user={user}
                     join={() => handleJoin(entity)}
                     leave={() => handleLeave(entity)}

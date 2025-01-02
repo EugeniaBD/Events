@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -10,20 +11,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { create } from "@/firebase/firestore/eventsCollection";
+import { create, getById, update } from "@/firebase/firestore/eventsCollection";
 import useFirebaseAuth from "@/hooks/use-firebase-auth";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import * as Yup from "yup";
 
 const defaultValues = {
   title: "",
   description: "",
   places: 0,
-  datetime: new Date().toUTCString(),
-  location: "",
+  datetime: "",
 };
 
 const Schema = Yup.object().shape({
@@ -31,15 +31,16 @@ const Schema = Yup.object().shape({
   description: Yup.string().required(),
   places: Yup.number().required().min(1),
   datetime: Yup.string().required(),
-  location: Yup.string().required(),
 });
 
 type TSchema = Yup.InferType<typeof Schema>;
 
 const Page: React.FC = () => {
   const router = useRouter();
+  const params = useParams<{ id: string }>();
   const { user } = useFirebaseAuth();
 
+  const [latLng, setLatLng] = React.useState<[number, number]>([0, 0]);
   const [submiting, setSubmiting] = React.useState(false);
 
   const form = useForm<TSchema>({
@@ -47,31 +48,59 @@ const Page: React.FC = () => {
     resolver: yupResolver(Schema),
   });
 
-  const submitHandler = React.useCallback(
-    (value: TSchema) => {
-      if (user) {
-        setSubmiting(true);
-        create({
-          ...value,
-          userId: user?.uid,
-          datetime: new Date(value.datetime),
-        })
-          .then(() => router.back())
-          .finally(() => setSubmiting(false));
-      }
-    },
-    [user]
-  );
+  const submitHandler: SubmitHandler<TSchema> = (value) => {
+    console.log("submitHandler", value);
+    if (!user) {
+      return;
+    }
+    setSubmiting(true);
+    let promise = null;
+    const { id } = params;
+    const event = {
+      ...value,
+      userId: user?.uid,
+      datetime: value.datetime,
+      location: "",
+    };
+    if (id) {
+      promise = update({ id, ...event, latLng });
+    } else {
+      promise = create({ ...event, latLng });
+    }
+    promise.then(() => router.back()).finally(() => setSubmiting(false));
+  };
+
+  const handleInvalid: SubmitErrorHandler<TSchema> = (value) =>
+    console.log("handleInvalid", value);
 
   const handleClose = () => router.back();
 
+  React.useEffect(() => {
+    const { id } = params;
+    if (!id) {
+      return;
+    }
+    if (!form) {
+      return;
+    }
+    getById(id).then((result) => {
+      if (!result) {
+        return;
+      }
+      const { latLng, ...rest } = result;
+      setLatLng(latLng);
+      form.reset({ ...rest });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params, form]);
+
   return (
-    <div className="flex min-h-svh w-full">
-      <div className="w-full max-w-full sm:max-w-sm md:max-w-md lg:max-w-lg ">
+    <div className="h-dvh grid grid-cols-2">
+      <div className="">
         <Card>
           <CardContent className="p-4">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(submitHandler)}>
+              <form onSubmit={form.handleSubmit(submitHandler, handleInvalid)}>
                 <div className="grid gap-y-4">
                   <FormField
                     control={form.control}
@@ -123,11 +152,7 @@ const Page: React.FC = () => {
                       <FormItem>
                         <FormLabel>Date Time</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="date time"
-                            type="datetime-local"
-                          />
+                          <Input {...field} type="datetime-local" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -152,6 +177,7 @@ const Page: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+      <div className="p-2">{/* <LeafletMap latlng={latLng} /> */}</div>
     </div>
   );
 };

@@ -6,6 +6,7 @@ export default async function createDocument(
   path: string,
   data: Partial<unknown>
 ) {
+  console.log("createDocument", path, data);
   // Variable to store the result of the operation
   let result = null;
   // Variable to store any error that occurs during the operation

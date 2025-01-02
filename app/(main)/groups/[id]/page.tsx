@@ -87,8 +87,7 @@ const Page: React.FC = () => {
               {user && group && (
                 <EntityUserActions
                   user={user}
-                  requests={group.requests ?? []}
-                  members={group.members ?? []}
+                  entity={{ ...group, type: "Group" }}
                   join={handleJoin}
                   leave={handleLeave}
                 />

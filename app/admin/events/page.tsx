@@ -7,17 +7,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getAll } from "@/firebase/firestore/eventsCollection";
+import { getAllByUserId } from "@/firebase/firestore/eventsCollection";
+import useFirebaseAuth from "@/hooks/use-firebase-auth";
 import { TEvent } from "@/lib/types";
+import { Edit } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
 const Page: React.FC = () => {
   const [events, setEvents] = React.useState<TEvent[]>([]);
+  const { user } = useFirebaseAuth();
 
   React.useEffect(() => {
-    getAll().then((data) => setEvents(data));
-  }, []);
+    if (user) {
+      getAllByUserId(user.uid).then((data) => setEvents(data));
+    }
+  }, [user]);
 
   return (
     <>
@@ -28,13 +33,20 @@ const Page: React.FC = () => {
         </Button>
       </div>
       <div className="flex flex-col space-y-2 py-2">
-        {events.map((club) => (
-          <Card key={club.id}>
-            <CardHeader>
-              <Link href={`/admin/clubs/${club.id}`}>
-                <CardTitle className="text-2xl">{club.title}</CardTitle>
-                <CardDescription>{club.description}</CardDescription>
+        {events.map(({ id, title, description }) => (
+          <Card key={id}>
+            <CardHeader className="flex flex-row items-start">
+              <Link href={`/admin/events/${id}`} className="flex-grow">
+                <CardTitle className="text-2xl">{title}</CardTitle>
+                <CardDescription>{description}</CardDescription>
               </Link>
+              <div>
+                <Button asChild size="icon" variant="ghost">
+                  <Link href={`/admin/events/${id}/edit`}>
+                    <Edit />
+                  </Link>
+                </Button>
+              </div>
             </CardHeader>
           </Card>
         ))}

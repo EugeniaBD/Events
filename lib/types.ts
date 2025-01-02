@@ -24,17 +24,6 @@ export type TUserInfo = {
   displayName: string | null;
 };
 
-export type TEvent = {
-  id: string;
-  userId: string;
-  title: string;
-  description: string;
-  location: string;
-  places: number;
-  datetime: Date;
-  parentId?: string;
-};
-
 export type TRequest = {
   id: string;
   user: TUserInfo;
@@ -64,3 +53,11 @@ export type TEntity = {
 
 export type TClub = Omit<TEntity, "type">;
 export type TGroup = Omit<TEntity, "type">;
+export type TEvent = Omit<TEntity, "type"> & {
+  latLng: [number, number];
+  places: number;
+  datetime: string;
+  parentId?: string;
+  bookings?: TUserInfo[];
+  isCancled?: boolean;
+};
