@@ -11,11 +11,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import LocationMarker from "@/features/leaflet-custom/location-marker";
+import MapContainer, { MapRef } from "@/features/leaflet-custom/map-container";
+import { TileLayer } from "@/features/leaflet-custom/tile-layer";
 import { create, getById, update } from "@/firebase/firestore/eventsCollection";
 import useFirebaseAuth from "@/hooks/use-firebase-auth";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { LatLng, LatLngExpression } from "leaflet";
 import { useParams, useRouter } from "next/navigation";
-import React from "react";
+import React, { Dispatch, SetStateAction, useRef } from "react";
 import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import * as Yup from "yup";
 
@@ -36,11 +40,12 @@ const Schema = Yup.object().shape({
 type TSchema = Yup.InferType<typeof Schema>;
 
 const Page: React.FC = () => {
+  const ref = useRef<MapRef>(null);
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const { user } = useFirebaseAuth();
 
-  const [latLng, setLatLng] = React.useState<[number, number]>([0, 0]);
+  const [latLng, setLatLng] = React.useState<LatLng>(new LatLng(0, 0));
   const [submiting, setSubmiting] = React.useState(false);
 
   const form = useForm<TSchema>({
@@ -63,9 +68,9 @@ const Page: React.FC = () => {
       location: "",
     };
     if (id) {
-      promise = update({ id, ...event, latLng });
+      promise = update({ id, ...event, latLng: `${latLng.lat},${latLng.lng}` });
     } else {
-      promise = create({ ...event, latLng });
+      promise = create({ ...event, latLng: latLng.toString() });
     }
     promise.then(() => router.back()).finally(() => setSubmiting(false));
   };
@@ -88,14 +93,28 @@ const Page: React.FC = () => {
         return;
       }
       const { latLng, ...rest } = result;
-      setLatLng(latLng);
+      if (latLng) {
+        try {
+          const [lat, lng] = latLng.split(",").map((d) => Number(d));
+          // console.log(latLng, lat, lng);
+          setLatLng(new LatLng(lat, lng));
+        } catch (e) {
+          console.log("", e);
+        }
+      }
       form.reset({ ...rest });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params, form]);
 
+  React.useEffect(() => {
+    if (ref.current) {
+      ref.current.flyTo(latLng);
+    }
+  }, [ref, latLng]);
+
   return (
-    <div className="h-dvh grid grid-cols-2">
+    <div className="grid grid-cols-2 space-x-2 h-dvh">
       <div className="">
         <Card>
           <CardContent className="p-4">
@@ -168,7 +187,7 @@ const Page: React.FC = () => {
                       Close
                     </Button>
                     <Button type="submit" className="" disabled={submiting}>
-                      Create
+                      {params.id ? "Update" : "Create"}
                     </Button>
                   </div>
                 </div>
@@ -177,7 +196,27 @@ const Page: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-      <div className="p-2">{/* <LeafletMap latlng={latLng} /> */}</div>
+      <div className="p-2 border rounded-lg bg-white">
+        {`${latLng}`}
+        <MapContainer
+          ref={ref}
+          center={latLng}
+          style={{ height: "100%" }}
+          zoom={13}
+          scrollWheelZoom={false}
+          doubleClickZoom
+          fadeAnimation
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <LocationMarker
+            latLng={latLng}
+            setLatLng={setLatLng as Dispatch<SetStateAction<LatLngExpression>>}
+          />
+        </MapContainer>
+      </div>
     </div>
   );
 };

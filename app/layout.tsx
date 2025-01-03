@@ -10,22 +10,15 @@ const Layout: React.FC<
 > = ({ children }) => {
   return (
     <html lang="en">
-      {/* <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossOrigin=""
-        precedence="default"
-      /> */}
-      <body className="p-0 h-dvh max-h-dvh overflow-hidden">
-        {children}
-        {/* <Script
-          src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
           crossOrigin=""
-          async
-        ></Script> */}
-      </body>
+        />
+      </head>
+      <body className="p-0 h-dvh max-h-dvh overflow-hidden">{children}</body>
     </html>
   );
 };

@@ -54,9 +54,9 @@ export type TEntity = {
 export type TClub = Omit<TEntity, "type">;
 export type TGroup = Omit<TEntity, "type">;
 export type TEvent = Omit<TEntity, "type"> & {
-  latLng: [number, number];
   places: number;
   datetime: string;
+  latLng?: string;
   parentId?: string;
   bookings?: TUserInfo[];
   isCancled?: boolean;
