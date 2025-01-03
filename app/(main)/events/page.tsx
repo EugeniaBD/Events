@@ -67,7 +67,7 @@ const Page: React.FC = () => {
       <div className="">
         <h6 className="font-semibold text-lg">Booked Events</h6>
       </div>
-      <div className="grid grid-cols-2 py-2 space-x-2 ">
+      <div className="grid grid-cols-2 py-2 space-x-2 h-full ">
         <div className="flex flex-col space-y-2">
           {events.map(({ id, title, description, datetime, latLng }) => (
             <Card key={id}>
@@ -79,7 +79,7 @@ const Page: React.FC = () => {
             </Card>
           ))}
         </div>
-        <div className="p-2 bg-white border rounded-lg">
+        <div className="p-2 bg-white border rounded-lg h-full">
           <MapContainer
             ref={ref}
             style={{ height: "100%" }}
